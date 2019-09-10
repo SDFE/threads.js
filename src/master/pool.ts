@@ -245,7 +245,7 @@ function PoolConstructor<ThreadType extends Thread>(
     }
   )
 
-  const scheduleWork = () => {
+  const scheduleWork = ({ timeout = 5000 } = {}) => {
     debug(`Attempt de-queueing a task in order to run it...`)
 
     const availableWorker = findIdlingWorker(workers, concurrency)
@@ -268,10 +268,36 @@ function PoolConstructor<ThreadType extends Thread>(
       // Defer task execution by one tick to give handlers time to subscribe
       await sleep(0)
 
+      let workerCrashed = false;
+
       try {
-        await runPoolTask(task, availableWorker, workerID, eventSubject, debug)
+        await Promise.race([
+          runPoolTask(task, availableWorker, workerID, eventSubject, debug),
+          sleep(timeout).then(() => { throw new Error('Timeout!') }),
+        ]);
+      } catch (err) {
+        if (err.message === 'Timeout!') {
+          workerCrashed = true;
+        } else {
+          throw err;
+        }
       } finally {
         removeTaskFromWorkersRunningTasks()
+
+        if (workerCrashed) {
+          console.log('Worker crashed!')
+          Thread.terminate(await availableWorker.init);
+          console.log('Terminated worker');
+          const workerIndex = workers.indexOf(availableWorker);
+          if (workerIndex === -1) {
+            throw new Error('Cannot replace thread that timed out');
+          }
+          workers[workerIndex] = {
+            init: spawnWorker(),
+            runningTasks: []
+          };
+          console.log('Respawned worker');
+        }
 
         if (!isClosing) {
           scheduleWork()
