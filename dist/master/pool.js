@@ -135,13 +135,13 @@ function PoolConstructor(spawnWorker, optionsOrSize) {
             };
             // Defer task execution by one tick to give handlers time to subscribe
             yield sleep(0);
-            let workerCrashed = false;
+            let workerTimedOut = false;
             try {
                 yield runPoolTask(task, availableWorker, workerID, eventSubject, debug);
             }
             catch (err) {
                 if (err.message === 'Timeout!') {
-                    workerCrashed = true;
+                    workerTimedOut = true;
                 }
                 else {
                     throw err;
@@ -149,8 +149,8 @@ function PoolConstructor(spawnWorker, optionsOrSize) {
             }
             finally {
                 removeTaskFromWorkersRunningTasks();
-                if (workerCrashed) {
-                    thread_1.Thread.terminate(yield availableWorker.init);
+                if (workerTimedOut) {
+                    yield thread_1.Thread.terminate(yield availableWorker.init);
                     const workerIndex = workers.indexOf(availableWorker);
                     if (workerIndex === -1) {
                         throw new Error('Cannot replace thread that timed out');

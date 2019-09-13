@@ -274,19 +274,19 @@ function PoolConstructor<ThreadType extends Thread>(
       // Defer task execution by one tick to give handlers time to subscribe
       await sleep(0)
 
-      let workerCrashed = false;
+      let workerTimedOut = false;
       try {
         await runPoolTask(task, availableWorker, workerID, eventSubject, debug)
       } catch (err) {
         if (err.message === 'Timeout!') {
-          workerCrashed = true;
+          workerTimedOut = true;
         } else {
           throw err;
         }
       } finally {
         removeTaskFromWorkersRunningTasks()
-        if (workerCrashed) {
-          Thread.terminate(await availableWorker.init);
+        if (workerTimedOut) {
+          await Thread.terminate(await availableWorker.init);
           const workerIndex = workers.indexOf(availableWorker);
           if (workerIndex === -1) {
             throw new Error('Cannot replace thread that timed out');
