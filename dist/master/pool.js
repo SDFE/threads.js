@@ -82,7 +82,7 @@ function runPoolTask(task, availableWorker, workerID, eventSubject, debug, TIMEO
                 error,
                 workerID
             });
-            if (error.message === 'Timeout!') {
+            if (error.message === 'Timeout service worker') {
                 throw error;
             }
         }
@@ -140,7 +140,7 @@ function PoolConstructor(spawnWorker, optionsOrSize) {
                 yield runPoolTask(task, availableWorker, workerID, eventSubject, debug);
             }
             catch (err) {
-                if (err.message === 'Timeout!') {
+                if (err.message === 'Timeout service worker') {
                     workerTimedOut = true;
                 }
                 else {

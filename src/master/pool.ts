@@ -133,7 +133,7 @@ async function runPoolTask<ThreadType extends Thread>(
       error,
       workerID
     })
-    if(error.message === 'Timeout!'){
+    if(error.message === 'Timeout service worker'){
       throw error;
     }
   }
@@ -273,12 +273,11 @@ function PoolConstructor<ThreadType extends Thread>(
       }
       // Defer task execution by one tick to give handlers time to subscribe
       await sleep(0)
-
       let workerTimedOut = false;
       try {
         await runPoolTask(task, availableWorker, workerID, eventSubject, debug)
       } catch (err) {
-        if (err.message === 'Timeout!') {
+        if (err.message === 'Timeout service worker') {
           workerTimedOut = true;
         } else {
           throw err;
