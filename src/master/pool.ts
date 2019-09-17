@@ -116,7 +116,7 @@ async function runPoolTask<ThreadType extends Thread>(
     const returnValue = await Promise.race([
       task.run(await availableWorker.init),
       sleep(TIMEOUT).then(()=>{
-        throw new Error('Timeout service worker');})
+        throw new Error('Timeout worker thread');})
     ]);
     debug(`Task #${task.id} completed successfully`)
     eventSubject.next({
@@ -133,7 +133,7 @@ async function runPoolTask<ThreadType extends Thread>(
       error,
       workerID
     })
-    if(error.message === 'Timeout service worker'){
+    if(error.message === 'Timeout worker thread'){
       throw error;
     }
   }
@@ -277,7 +277,7 @@ function PoolConstructor<ThreadType extends Thread>(
       try {
         await runPoolTask(task, availableWorker, workerID, eventSubject, debug)
       } catch (err) {
-        if (err.message === 'Timeout service worker') {
+        if (err.message === 'Timeout worker thread') {
           workerTimedOut = true;
         } else {
           throw err;

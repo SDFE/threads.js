@@ -63,7 +63,7 @@ function runPoolTask(task, availableWorker, workerID, eventSubject, debug, TIMEO
             const returnValue = yield Promise.race([
                 task.run(yield availableWorker.init),
                 sleep(TIMEOUT).then(() => {
-                    throw new Error('Timeout service worker');
+                    throw new Error('Timeout worker thread');
                 })
             ]);
             debug(`Task #${task.id} completed successfully`);
@@ -82,7 +82,7 @@ function runPoolTask(task, availableWorker, workerID, eventSubject, debug, TIMEO
                 error,
                 workerID
             });
-            if (error.message === 'Timeout service worker') {
+            if (error.message === 'Timeout worker thread') {
                 throw error;
             }
         }
@@ -140,7 +140,7 @@ function PoolConstructor(spawnWorker, optionsOrSize) {
                 yield runPoolTask(task, availableWorker, workerID, eventSubject, debug);
             }
             catch (err) {
-                if (err.message === 'Timeout service worker') {
+                if (err.message === 'Timeout worker thread') {
                     workerTimedOut = true;
                 }
                 else {
