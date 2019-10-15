@@ -103,7 +103,7 @@ async function runPoolTask<ThreadType extends Thread>(
   workerID: number,
   eventSubject: ZenObservable.SubscriptionObserver<PoolEvent<ThreadType>>,
   debug: DebugLogger.Debugger,
-  TIMEOUT: number = 1000 * 20
+  TIMEOUT: number = 1000 * 60
 ) {
   debug(`Running task #${task.id} on worker #${workerID}...`)
   eventSubject.next({
@@ -115,8 +115,9 @@ async function runPoolTask<ThreadType extends Thread>(
   try {
     const returnValue = await Promise.race([
       task.run(await availableWorker.init),
-      sleep(TIMEOUT).then(()=>{
-        throw new Error('Timeout worker thread');})
+      sleep(TIMEOUT).then(() => {
+        throw new Error('Timeout worker thread');
+      })
     ]);
     debug(`Task #${task.id} completed successfully`)
     eventSubject.next({
@@ -133,7 +134,7 @@ async function runPoolTask<ThreadType extends Thread>(
       error,
       workerID
     })
-    if(error.message === 'Timeout worker thread'){
+    if (error.message === 'Timeout worker thread') {
       throw error;
     }
   }

@@ -51,7 +51,7 @@ function createArray(size) {
 function findIdlingWorker(workers, maxConcurrency) {
     return workers.find(worker => worker.runningTasks.length < maxConcurrency);
 }
-function runPoolTask(task, availableWorker, workerID, eventSubject, debug, TIMEOUT = 1000 * 20) {
+function runPoolTask(task, availableWorker, workerID, eventSubject, debug, TIMEOUT = 1000 * 60) {
     return __awaiter(this, void 0, void 0, function* () {
         debug(`Running task #${task.id} on worker #${workerID}...`);
         eventSubject.next({
