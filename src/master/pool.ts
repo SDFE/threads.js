@@ -103,7 +103,7 @@ async function runPoolTask<ThreadType extends Thread>(
   workerID: number,
   eventSubject: ZenObservable.SubscriptionObserver<PoolEvent<ThreadType>>,
   debug: DebugLogger.Debugger,
-  TIMEOUT: number = 1000 * 60
+  TIMEOUT: number = 2000 * 60
 ) {
   debug(`Running task #${task.id} on worker #${workerID}...`)
   eventSubject.next({
